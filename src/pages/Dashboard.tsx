@@ -1,0 +1,125 @@
+import { useEffect, useState } from "react";
+import DashboardLayout from "@/layouts/DashboardLayout";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
+
+type DashboardProps = {
+  user: {
+    id: string;
+    username: string;
+    avatar: string;
+  };
+};
+
+type DashboardStats = {
+  totalGuilds: number;
+  activeUsers: number;
+  creditsSpent: number;
+};
+
+export default function Dashboard({ user }: DashboardProps) {
+  const [stats, setStats] = useState<DashboardStats>({
+    totalGuilds: 0,
+    activeUsers: 0,
+    creditsSpent: 0,
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  // Apply dark mode
+  useEffect(() => {
+    document.documentElement.classList.add("dark");
+  }, []);
+
+  // Fetch real stats from Monika backend
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/stats/overview`);
+        const data = await res.json();
+        setStats(data);
+      } catch (err) {
+        console.error("Failed to fetch dashboard stats:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardStats();
+  }, []);
+
+  return (
+    <DashboardLayout user={user}>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-white">
+              Welcome, {user?.username} 👋
+            </h2>
+            <p className="text-muted-foreground text-sm mt-1">
+              Here's your Monika dashboard overview.
+            </p>
+          </div>
+          <Avatar className="w-12 h-12 ring-2 ring-primary">
+            <AvatarImage
+              src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`}
+              alt={user.username}
+            />
+            <AvatarFallback>
+              {user.username.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Servers Connected</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">
+                {loading ? "..." : stats.totalGuilds}
+              </p>
+              <p className="text-sm text-muted-foreground">active guilds</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Active Users</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">
+                {loading ? "..." : stats.activeUsers}
+              </p>
+              <p className="text-sm text-muted-foreground">unique users this week</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Credits Spent</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">
+                {loading ? "..." : `₦${stats.creditsSpent.toLocaleString()}`}
+              </p>
+              <p className="text-sm text-muted-foreground">total this month</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}

@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === Global Styles === */
+:root {
+  --radius: 0.75rem;
+
+  /* Light mode colors */
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+
+  --primary: 254 100% 70%; /* Electric violet */
+  --primary-foreground: 240 10% 10%;
+
+  --secondary: 160 84% 39%; /* Cyber green */
+  --secondary-foreground: 240 10% 10%;
+
+  --accent: 0 100% 67%; /* Vivid red */
+  --accent-foreground: 240 10% 10%;
+
+  --muted: 240 6% 90%;
+  --muted-foreground: 240 4% 50%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 240 5% 86%;
+  --input: 240 5% 86%;
+  --ring: 254 100% 70%;
+
+  --chart-1: 254 100% 70%;
+  --chart-2: 160 84% 39%;
+  --chart-3: 0 100% 67%;
+  --chart-4: 45 100% 51%;
+  --chart-5: 280 100% 67%;
+}
+
+.dark {
+  --background: 240 10% 5%;
+  --foreground: 0 0% 100%;
+
+  --card: 240 10% 10%;
+  --card-foreground: 0 0% 100%;
+
+  --popover: 240 10% 12%;
+  --popover-foreground: 0 0% 100%;
+
+  --primary: 254 100% 70%;
+  --primary-foreground: 240 10% 10%;
+
+  --secondary: 160 84% 39%;
+  --secondary-foreground: 240 10% 10%;
+
+  --accent: 0 100% 67%;
+  --accent-foreground: 240 10% 10%;
+
+  --muted: 240 6% 20%;
+  --muted-foreground: 240 4% 60%;
+
+  --destructive: 0 100% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 240 5% 26%;
+  --input: 240 5% 26%;
+  --ring: 254 100% 70%;
+
+  --chart-1: 254 100% 70%;
+  --chart-2: 160 84% 39%;
+  --chart-3: 0 100% 67%;
+  --chart-4: 45 100% 51%;
+  --chart-5: 280 100% 67%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold text-foreground;
+  }
+
+  a {
+    @apply text-primary font-medium;
+    text-decoration: none;
+  }
+
+  a:hover {
+    @apply underline;
+  }
+
+  button {
+    @apply bg-primary text-primary-foreground font-medium px-4 py-2 rounded-md transition duration-300 hover:bg-opacity-80;
+  }
+}
