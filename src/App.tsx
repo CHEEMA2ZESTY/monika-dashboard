@@ -5,7 +5,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 
 import DashboardLayout from "./layouts/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
@@ -15,6 +15,7 @@ import Users from "./pages/users";
 import Servers from "./pages/servers";
 import Callback from "./pages/callback";
 import Login from "./pages/Login";
+import HomePage from "./pages/Homepage"; // ✅ New
 
 // Shared full-page layout
 function FullPageCenter({ children }: { children: React.ReactNode }) {
@@ -25,55 +26,87 @@ function FullPageCenter({ children }: { children: React.ReactNode }) {
   );
 }
 
-// JWT Decode type
+// User Type
 interface DecodedUser {
   id: string;
   username: string;
   avatar: string;
 }
 
-// Extract user from token
-function getUserFromToken(): DecodedUser | null {
-  const token = localStorage.getItem("monika_jwt");
-  if (!token) return null;
-  try {
-    const decoded = jwtDecode<DecodedUser & { avatar: string | null }>(token);
-    return {
-      id: decoded.id,
-      username: decoded.username,
-      avatar: decoded.avatar ?? "",
-    };
-  } catch {
-    return null;
+// AuthRoute with user context
+function AuthRoute({
+  user,
+  loading,
+  children,
+}: {
+  user: DecodedUser | null;
+  loading: boolean;
+  children: React.ReactNode;
+}) {
+  if (loading) {
+    return (
+      <FullPageCenter>
+        <p className="text-lg">Loading...</p>
+      </FullPageCenter>
+    );
   }
-}
 
-// Route guard
-function AuthRoute({ children }: { children: React.ReactNode }) {
-  const token = localStorage.getItem("monika_jwt");
-  if (!token) return <Navigate to="/" replace />;
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+
   return <>{children}</>;
 }
 
 function App(): React.JSX.Element {
-  const user = getUserFromToken();
+  const [user, setUser] = React.useState<DecodedUser | null>(null);
+  const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
     document.documentElement.classList.add("dark");
+
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/me`, {
+          withCredentials: true,
+        });
+        setUser(res.data.user);
+      } catch (err) {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
   }, []);
 
   return (
     <Router>
       <Routes>
-        {/* If user is already logged in, redirect to dashboard */}
+        {/* Default route — redirect logged in users to /home */}
         <Route
           path="/"
           element={
-            user ? (
-              <Navigate to="/dashboard" replace />
+            loading ? (
+              <FullPageCenter>
+                <p className="text-lg">Loading...</p>
+              </FullPageCenter>
+            ) : user ? (
+              <Navigate to="/home" replace />
             ) : (
               <Login />
             )
+          }
+        />
+
+        {/* Home Page */}
+        <Route
+          path="/home"
+          element={
+            <AuthRoute user={user} loading={loading}>
+              <HomePage /> {/* ✅ Fixed: no props passed */}
+            </AuthRoute>
           }
         />
 
@@ -84,51 +117,47 @@ function App(): React.JSX.Element {
         <Route
           path="/dashboard"
           element={
-            <AuthRoute>
+            <AuthRoute user={user} loading={loading}>
               <DashboardLayout user={user!}>
                 <Dashboard user={user!} />
               </DashboardLayout>
             </AuthRoute>
           }
         />
-
         <Route
           path="/dashboard/analytics"
           element={
-            <AuthRoute>
+            <AuthRoute user={user} loading={loading}>
               <DashboardLayout user={user!}>
                 <Analytics user={user!} />
               </DashboardLayout>
             </AuthRoute>
           }
         />
-
         <Route
           path="/dashboard/users"
           element={
-            <AuthRoute>
+            <AuthRoute user={user} loading={loading}>
               <DashboardLayout user={user!}>
                 <Users />
               </DashboardLayout>
             </AuthRoute>
           }
         />
-
         <Route
           path="/dashboard/servers"
           element={
-            <AuthRoute>
+            <AuthRoute user={user} loading={loading}>
               <DashboardLayout user={user!}>
                 <Servers />
               </DashboardLayout>
             </AuthRoute>
           }
         />
-
         <Route
           path="/dashboard/:guildId"
           element={
-            <AuthRoute>
+            <AuthRoute user={user} loading={loading}>
               <DashboardLayout user={user!}>
                 <GuildDashboard />
               </DashboardLayout>

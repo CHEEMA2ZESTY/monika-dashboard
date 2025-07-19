@@ -16,15 +16,15 @@ const Callback = () => {
 
     const exchangeCodeForToken = async () => {
       try {
-        // 🔁 Exchange the code for tokens (access + refresh stored in cookies)
+        // 🔁 Exchange the code for HttpOnly cookie-based session
         await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/auth/token`,
           { code },
           { withCredentials: true }
         );
 
-        // 🎯 Navigate to dashboard — no need to store tokens manually
-        navigate("/dashboard");
+        // ✅ No localStorage needed — session stored securely
+        navigate("/home"); // 👈 updated from /dashboard to /home
       } catch (err) {
         console.error("❌ Token exchange failed:", err);
         navigate("/");
