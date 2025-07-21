@@ -1,4 +1,3 @@
-// src/hooks/useAuth.ts
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -15,8 +14,8 @@ export const useAuth = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/me`, {
-          withCredentials: true,
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/me`, {
+          withCredentials: true, // ✅ Needed to include cookie
         });
         setUser(res.data);
       } catch (err) {
@@ -32,7 +31,11 @@ export const useAuth = () => {
 
   const logout = async () => {
     try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/logout`, {}, { withCredentials: true });
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/logout`,
+        {},
+        { withCredentials: true }
+      );
     } catch {}
     setUser(null);
   };

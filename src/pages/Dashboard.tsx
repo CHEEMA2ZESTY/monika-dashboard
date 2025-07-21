@@ -11,14 +11,8 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar";
-
-type DashboardProps = {
-  user: {
-    id: string;
-    username: string;
-    avatar: string;
-  };
-};
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 type DashboardStats = {
   totalGuilds: number;
@@ -26,36 +20,51 @@ type DashboardStats = {
   creditsSpent: number;
 };
 
-export default function Dashboard({ user }: DashboardProps) {
+export default function Dashboard() {
+  const { user, loading: authLoading } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
     totalGuilds: 0,
     activeUsers: 0,
     creditsSpent: 0,
   });
 
-  const [loading, setLoading] = useState(true);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const navigate = useNavigate();
 
-  // Apply dark mode
   useEffect(() => {
     document.documentElement.classList.add("dark");
   }, []);
 
-  // Fetch real stats from Monika backend
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/login");
+    }
+  }, [authLoading, user, navigate]);
+
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/stats/overview`);
+        const res = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/stats/overview`,
+          {
+            credentials: "include",
+          }
+        );
         const data = await res.json();
         setStats(data);
       } catch (err) {
         console.error("Failed to fetch dashboard stats:", err);
       } finally {
-        setLoading(false);
+        setLoadingStats(false);
       }
     };
 
-    fetchDashboardStats();
-  }, []);
+    if (user) fetchDashboardStats();
+  }, [user]);
+
+  if (authLoading || !user) {
+    return <p className="text-center text-white">Loading dashboard...</p>;
+  }
 
   return (
     <DashboardLayout user={user}>
@@ -64,7 +73,7 @@ export default function Dashboard({ user }: DashboardProps) {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">
-              Welcome, {user?.username} 👋
+              Welcome, {user.username} 👋
             </h2>
             <p className="text-muted-foreground text-sm mt-1">
               Here's your Monika dashboard overview.
@@ -89,7 +98,7 @@ export default function Dashboard({ user }: DashboardProps) {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">
-                {loading ? "..." : stats.totalGuilds}
+                {loadingStats ? "..." : stats.totalGuilds}
               </p>
               <p className="text-sm text-muted-foreground">active guilds</p>
             </CardContent>
@@ -101,7 +110,7 @@ export default function Dashboard({ user }: DashboardProps) {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">
-                {loading ? "..." : stats.activeUsers}
+                {loadingStats ? "..." : stats.activeUsers}
               </p>
               <p className="text-sm text-muted-foreground">unique users this week</p>
             </CardContent>
@@ -113,7 +122,7 @@ export default function Dashboard({ user }: DashboardProps) {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">
-                {loading ? "..." : `₦${stats.creditsSpent.toLocaleString()}`}
+                {loadingStats ? "..." : `₦${stats.creditsSpent.toLocaleString()}`}
               </p>
               <p className="text-sm text-muted-foreground">total this month</p>
             </CardContent>

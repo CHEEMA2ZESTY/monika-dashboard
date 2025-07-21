@@ -8,7 +8,7 @@ interface DashboardLayoutProps {
   children: React.ReactNode
   user: {
     id: string
-    avatar: string
+    avatar: string | null  // ✅ Updated type to allow null
     username: string
   }
 }
@@ -36,11 +36,15 @@ export default function DashboardLayout({ children, user }: DashboardLayoutProps
         <div className="flex items-center gap-3">
           <Avatar className="w-10 h-10 ring-2 ring-white">
             <AvatarImage
-              src={`https://cdn.discordapp.com/avatars/${user?.id}/${user?.avatar}.png`}
-              alt={user?.username}
+              src={
+                user.avatar
+                  ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+                  : undefined
+              }
+              alt={user.username}
             />
             <AvatarFallback>
-              {user?.username?.slice(0, 2).toUpperCase()}
+              {user.username?.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </div>
