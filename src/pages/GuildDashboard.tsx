@@ -5,12 +5,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
-const dummyUser = {
-  username: "Admin",
-  id: "0",
-  avatar: ""
-};
-
 interface GuildSettings {
   xpEnabled: boolean;
   redPillEnabled: boolean;
@@ -18,7 +12,15 @@ interface GuildSettings {
   narrationEnabled: boolean;
 }
 
-export default function GuildDashboard() {
+interface GuildDashboardProps {
+  user: {
+    username: string;
+    id: string;
+    avatar: string | null;
+  };
+}
+
+export default function GuildDashboard({ user }: GuildDashboardProps) {
   const { guildId } = useParams<{ guildId: string }>();
   const [guildSettings, setGuildSettings] = useState<GuildSettings | null>(null);
   const [saving, setSaving] = useState(false);
@@ -73,14 +75,14 @@ export default function GuildDashboard() {
 
   if (!guildSettings) {
     return (
-      <DashboardLayout user={dummyUser}>
+      <DashboardLayout user={user}>
         <div className="text-muted-foreground">Loading settings...</div>
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout user={dummyUser}>
+    <DashboardLayout user={user}>
       <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-bold text-white mb-1">🔧 Server Config</h2>

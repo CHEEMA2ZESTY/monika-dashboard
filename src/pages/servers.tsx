@@ -16,6 +16,12 @@ const dummyUser = {
   username: "Admin",
 };
 
+function formatKey(key: string) {
+  return key
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (str) => str.toUpperCase());
+}
+
 export default function Servers() {
   const [servers, setServers] = useState<ServerData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,29 +45,33 @@ export default function Servers() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {servers.map((server) => (
-            <Card key={server.id} className="bg-card">
-              <CardHeader>
-                <CardTitle className="text-lg">{server.name}</CardTitle>
-                <CardDescription className="text-sm text-muted-foreground">
-                  ID: {server.id}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {Object.entries(server.features).map(([key, enabled]) => (
-                  <div
-                    key={key}
-                    className="flex items-center justify-between border-t pt-2"
-                  >
-                    <span className="capitalize">{key}</span>
-                    <Switch checked={enabled} disabled />
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {loading ? (
+          <p className="text-muted-foreground">Loading servers...</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {servers.map((server) => (
+              <Card key={server.id} className="bg-card">
+                <CardHeader>
+                  <CardTitle className="text-lg">{server.name}</CardTitle>
+                  <CardDescription className="text-sm text-muted-foreground">
+                    ID: {server.id}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {Object.entries(server.features).map(([key, enabled]) => (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between border-t pt-2"
+                    >
+                      <span>{formatKey(key)}</span>
+                      <Switch checked={enabled} disabled />
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import {
   Card,
@@ -11,7 +12,6 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar";
-import { useNavigate } from "react-router-dom";
 
 type DashboardStats = {
   totalGuilds: number;
@@ -35,11 +35,8 @@ export default function Dashboard({ user }: DashboardProps) {
   });
 
   const [loadingStats, setLoadingStats] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    document.documentElement.classList.add("dark");
-  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -56,10 +53,12 @@ export default function Dashboard({ user }: DashboardProps) {
             credentials: "include",
           }
         );
+        if (!res.ok) throw new Error("Failed to load stats");
         const data = await res.json();
         setStats(data);
       } catch (err) {
-        console.error("Failed to fetch dashboard stats:", err);
+        console.error("Dashboard stats error:", err);
+        setError("Unable to load dashboard stats.");
       } finally {
         setLoadingStats(false);
       }
@@ -79,7 +78,7 @@ export default function Dashboard({ user }: DashboardProps) {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">
-              Welcome, {user.username ?? "User"} 👋
+              Welcome, {user.username || "User"} 👋
             </h2>
             <p className="text-muted-foreground text-sm mt-1">
               Here's your Monika dashboard overview.
@@ -92,56 +91,60 @@ export default function Dashboard({ user }: DashboardProps) {
                   ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
                   : undefined
               }
-              alt={user.username ?? "User"}
+              alt={user.username}
             />
             <AvatarFallback>
-              {(user.username?.slice(0, 2) ?? "UU").toUpperCase()}
+              {(user.username?.slice(0, 2) || "UU").toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Servers Connected</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">
-                {loadingStats ? "..." : stats.totalGuilds}
-              </p>
-              <p className="text-sm text-muted-foreground">active guilds</p>
-            </CardContent>
-          </Card>
+        {error ? (
+          <p className="text-red-500">{error}</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Servers Connected</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold">
+                  {loadingStats ? "..." : stats.totalGuilds}
+                </p>
+                <p className="text-sm text-muted-foreground">active guilds</p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Active Users</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">
-                {loadingStats ? "..." : stats.activeUsers}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                unique users this week
-              </p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Active Users</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold">
+                  {loadingStats ? "..." : stats.activeUsers}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  unique users this week
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Credits Spent</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">
-                {loadingStats
-                  ? "..."
-                  : `₦${stats.creditsSpent.toLocaleString()}`}
-              </p>
-              <p className="text-sm text-muted-foreground">total this month</p>
-            </CardContent>
-          </Card>
-        </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Credits Spent</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold">
+                  {loadingStats
+                    ? "..."
+                    : `₦${stats.creditsSpent.toLocaleString()}`}
+                </p>
+                <p className="text-sm text-muted-foreground">total this month</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

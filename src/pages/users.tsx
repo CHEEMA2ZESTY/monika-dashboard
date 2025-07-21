@@ -20,12 +20,25 @@ const dummyUser = {
   username: "Admin",
 };
 
+// Returns a valid Discord avatar URL or fallback if null
+const getAvatarUrl = (user: UserFromAPI) => {
+  if (user.avatar) {
+    return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+  } else {
+    const defaultAvatarIndex = Number(user.id) % 5;
+    return `https://cdn.discordapp.com/embed/avatars/${defaultAvatarIndex}.png`;
+  }
+};
+
+// Safely fallback to 0 if value is null/undefined
+const safe = (val: number | undefined) => val ?? 0;
+
 export default function Users() {
   const [users, setUsers] = useState<UserFromAPI[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.documentElement.classList.add("dark"); // Ensure dark mode is applied
+    document.documentElement.classList.add("dark");
 
     fetchUsersFromBackend()
       .then(setUsers)
@@ -50,11 +63,14 @@ export default function Users() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {users.map((user) => (
-              <Card key={user.id}>
+              <Card
+                key={user.id}
+                className="shadow-md hover:shadow-lg transition"
+              >
                 <CardHeader className="flex items-center gap-4">
                   <Avatar className="w-12 h-12">
                     <AvatarImage
-                      src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`}
+                      src={getAvatarUrl(user)}
                       alt={user.username}
                     />
                     <AvatarFallback>
@@ -64,11 +80,11 @@ export default function Users() {
                   <CardTitle>{user.username}</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
-                  <div><strong>XP:</strong> {user.xp}</div>
-                  <div><strong>Credits:</strong> {user.credits}</div>
-                  <div><strong>Red Pill:</strong> {user.redPill}</div>
-                  <div><strong>Blue Pill:</strong> {user.bluePill}</div>
-                  <div><strong>Warnings:</strong> {user.warnings}</div>
+                  <div><strong>XP:</strong> {safe(user.xp)}</div>
+                  <div><strong>Credits:</strong> {safe(user.credits)}</div>
+                  <div><strong>Red Pill:</strong> {safe(user.redPill)}</div>
+                  <div><strong>Blue Pill:</strong> {safe(user.bluePill)}</div>
+                  <div><strong>Warnings:</strong> {safe(user.warnings)}</div>
                 </CardContent>
               </Card>
             ))}

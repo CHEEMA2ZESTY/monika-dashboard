@@ -17,7 +17,6 @@ import Callback from "./pages/callback";
 import Login from "./pages/Login";
 import HomePage from "./pages/Homepage";
 
-// Shared full-page layout
 function FullPageCenter({ children }: { children: React.ReactNode }) {
   return (
     <div className="h-screen w-full flex items-center justify-center bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white">
@@ -26,14 +25,12 @@ function FullPageCenter({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ✅ Updated: Allow avatar to be string | null
 interface DecodedUser {
   id: string;
   username: string;
   avatar: string | null;
 }
 
-// AuthRoute
 function AuthRoute({
   user,
   loading,
@@ -70,8 +67,8 @@ function App(): React.JSX.Element {
         const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/me`, {
           withCredentials: true,
         });
-        setUser(res.data.user); // ✅ avatar is string | null
-      } catch (err) {
+        setUser(res.data.user);
+      } catch {
         setUser(null);
       } finally {
         setLoading(false);
@@ -154,14 +151,11 @@ function App(): React.JSX.Element {
           path="/dashboard/:guildId"
           element={
             <AuthRoute user={user} loading={loading}>
-              <DashboardLayout user={user!}>
-                <GuildDashboard />
-              </DashboardLayout>
+              <GuildDashboard user={user!} />
             </AuthRoute>
           }
         />
 
-        {/* Fallback 404 */}
         <Route
           path="*"
           element={
