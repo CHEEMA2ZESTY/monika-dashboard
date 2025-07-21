@@ -15,7 +15,7 @@ import Users from "./pages/users";
 import Servers from "./pages/servers";
 import Callback from "./pages/callback";
 import Login from "./pages/Login";
-import HomePage from "./pages/Homepage"; // ✅ New
+import HomePage from "./pages/Homepage";
 
 // Shared full-page layout
 function FullPageCenter({ children }: { children: React.ReactNode }) {
@@ -26,14 +26,14 @@ function FullPageCenter({ children }: { children: React.ReactNode }) {
   );
 }
 
-// User Type
+// ✅ Updated: Allow avatar to be string | null
 interface DecodedUser {
   id: string;
   username: string;
-  avatar: string;
+  avatar: string | null;
 }
 
-// AuthRoute with user context
+// AuthRoute
 function AuthRoute({
   user,
   loading,
@@ -70,7 +70,7 @@ function App(): React.JSX.Element {
         const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/me`, {
           withCredentials: true,
         });
-        setUser(res.data.user);
+        setUser(res.data.user); // ✅ avatar is string | null
       } catch (err) {
         setUser(null);
       } finally {
@@ -84,7 +84,6 @@ function App(): React.JSX.Element {
   return (
     <Router>
       <Routes>
-        {/* Default route — redirect logged in users to /home */}
         <Route
           path="/"
           element={
@@ -100,20 +99,17 @@ function App(): React.JSX.Element {
           }
         />
 
-        {/* Home Page */}
         <Route
           path="/home"
           element={
             <AuthRoute user={user} loading={loading}>
-              <HomePage /> {/* ✅ Fixed: no props passed */}
+              <HomePage />
             </AuthRoute>
           }
         />
 
-        {/* Discord OAuth callback */}
         <Route path="/callback" element={<Callback />} />
 
-        {/* Dashboard Routes */}
         <Route
           path="/dashboard"
           element={

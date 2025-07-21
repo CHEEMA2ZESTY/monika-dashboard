@@ -7,7 +7,6 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
-
 import { fetchAnalyticsStats } from "@/lib/analyticsQueries";
 
 type AnalyticsStats = {
@@ -20,11 +19,11 @@ type AnalyticsProps = {
   user: {
     id: string;
     username: string;
-    avatar: string;
+    avatar: string | null; // <- Updated this to match actual type
   };
 };
 
-export default function Analytics({ user }: AnalyticsProps) {
+const Analytics: React.FC<AnalyticsProps> = ({ user }) => {
   const [stats, setStats] = useState<AnalyticsStats>({
     totalXP: 0,
     creditsPurchased: 0,
@@ -36,9 +35,7 @@ export default function Analytics({ user }: AnalyticsProps) {
   }, []);
 
   useEffect(() => {
-    fetchAnalyticsStats()
-      .then(setStats)
-      .catch(console.error);
+    fetchAnalyticsStats().then(setStats).catch(console.error);
   }, []);
 
   return (
@@ -72,9 +69,7 @@ export default function Analytics({ user }: AnalyticsProps) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">
-                ₦{stats.creditsPurchased.toLocaleString()}
-              </p>
+              <p className="text-3xl font-bold">₦{stats.creditsPurchased.toLocaleString()}</p>
             </CardContent>
           </Card>
 
@@ -93,4 +88,6 @@ export default function Analytics({ user }: AnalyticsProps) {
       </div>
     </DashboardLayout>
   );
-}
+};
+
+export default Analytics;

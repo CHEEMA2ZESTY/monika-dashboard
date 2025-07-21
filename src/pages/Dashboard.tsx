@@ -11,7 +11,6 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar";
-import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
 type DashboardStats = {
@@ -20,8 +19,15 @@ type DashboardStats = {
   creditsSpent: number;
 };
 
-export default function Dashboard() {
-  const { user, loading: authLoading } = useAuth();
+interface DashboardProps {
+  user: {
+    id: string;
+    username: string;
+    avatar: string | null;
+  };
+}
+
+export default function Dashboard({ user }: DashboardProps) {
   const [stats, setStats] = useState<DashboardStats>({
     totalGuilds: 0,
     activeUsers: 0,
@@ -36,10 +42,10 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (!user) {
       navigate("/login");
     }
-  }, [authLoading, user, navigate]);
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchDashboardStats = async () => {
@@ -62,7 +68,7 @@ export default function Dashboard() {
     if (user) fetchDashboardStats();
   }, [user]);
 
-  if (authLoading || !user) {
+  if (!user) {
     return <p className="text-center text-white">Loading dashboard...</p>;
   }
 
@@ -73,7 +79,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white">
-              Welcome, {user.username} 👋
+              Welcome, {user.username ?? "User"} 👋
             </h2>
             <p className="text-muted-foreground text-sm mt-1">
               Here's your Monika dashboard overview.
@@ -81,11 +87,15 @@ export default function Dashboard() {
           </div>
           <Avatar className="w-12 h-12 ring-2 ring-primary">
             <AvatarImage
-              src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`}
-              alt={user.username}
+              src={
+                user.avatar
+                  ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+                  : undefined
+              }
+              alt={user.username ?? "User"}
             />
             <AvatarFallback>
-              {user.username.slice(0, 2).toUpperCase()}
+              {(user.username?.slice(0, 2) ?? "UU").toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </div>
@@ -112,7 +122,9 @@ export default function Dashboard() {
               <p className="text-3xl font-bold">
                 {loadingStats ? "..." : stats.activeUsers}
               </p>
-              <p className="text-sm text-muted-foreground">unique users this week</p>
+              <p className="text-sm text-muted-foreground">
+                unique users this week
+              </p>
             </CardContent>
           </Card>
 
@@ -122,7 +134,9 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">
-                {loadingStats ? "..." : `₦${stats.creditsSpent.toLocaleString()}`}
+                {loadingStats
+                  ? "..."
+                  : `₦${stats.creditsSpent.toLocaleString()}`}
               </p>
               <p className="text-sm text-muted-foreground">total this month</p>
             </CardContent>

@@ -1,20 +1,20 @@
-import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useState } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 interface DashboardLayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
   user: {
-    id: string
-    avatar: string | null  // ✅ Updated type to allow null
-    username: string
-  }
+    id: string;
+    avatar: string | null; // ✅ Safe for null
+    username: string;
+  };
 }
 
 export default function DashboardLayout({ children, user }: DashboardLayoutProps) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
@@ -60,18 +60,18 @@ export default function DashboardLayout({ children, user }: DashboardLayoutProps
         </main>
       </div>
     </div>
-  )
+  );
 }
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void } = {}) {
-  const { pathname } = useLocation()
+  const { pathname } = useLocation();
 
   const links = [
     { to: "/dashboard", label: "📊 Overview" },
     { to: "/dashboard/servers", label: "🛠️ Server Settings" },
     { to: "/dashboard/users", label: "👥 User Manager" },
     { to: "/dashboard/analytics", label: "📈 Analytics" },
-  ]
+  ];
 
   return (
     <nav className="flex flex-col gap-3 text-sm font-medium">
@@ -88,5 +88,5 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void } = {}) {
         </Link>
       ))}
     </nav>
-  )
+  );
 }
